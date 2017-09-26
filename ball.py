@@ -8,4 +8,4 @@ class ball(pygame.Surface):
     ball_vx, ball_vy= VX, VY
     ball_move_ticker = 0
     ball_move_ticker_max = TICKERMAX
-    ball.fill(yellow,(0,0,100,25))
+    ball.fill(blue,(0,0,100,25))
