@@ -3,14 +3,32 @@ from pygame.locals import *
 from colours import *
 from player import *
 
+#ToDo :
+#A lot...
+#Make it clearer through OO
+# - Use the ball class
+# - Make the ball being a circle
+# - Create a game class
+#Make it more readable and extendable
+# - Find a gracious way to manage the tickers
+# - Use a configuration file ton manage the backgrounds
+# - Redefine a STEP versus the SPEED and the VELOCITY (VX, VY)
+# - Rename the PATH to make them more relevant (PATH -> skin)
+# - Is there kind of a switch in Python? If true use it
+# - Make isColliding clearer - both name, arguments and code
+#Finish it
+# - add randomly appearing block to break
+# - add a second ball?
+# - give bonuses through block?
+
 def Game():    
     BACKGROUNDPATH= "./resources/backgrounds/sea.bmp"
     WIDTH = 600
     HEIGHT = 500
     SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+    STEP = 2
     PLAYERWIDTH = WIDTH*15/100
     PLAYERHEIGHT = HEIGHT*5/50
-    STEP = 2
     PLAYERSTEP = 2 * STEP
     VX, VY = 1*STEP, 1.5*STEP
     RUNNING = True
@@ -80,7 +98,7 @@ def Game():
 
 
         #Move the ball
-        #If the ball touche the ai...
+        #If ball touch ai...
         if isColliding((PLAYER2, PLAYER2.rect.x, PLAYER2.rect.y), (ball, ball_x, ball_y)):
             if ball_vx > 0:
                 ball_vx = VX
