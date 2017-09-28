@@ -21,6 +21,59 @@ from player import *
 # - add a second ball?
 # - give bonuses through block?
 
+
+class Gaming():
+    def __init__(self):
+        pygame.mixer.init(22050,-16,2,16)
+        pygame.init()
+        self.setIcon()
+        self.reset()
+
+    def setIcon(self):
+        self.icon = pygame.image.load("./ressources/Players/SealDraw.png")
+        pygame.display.set_icon(self.icon)
+
+    def reset(self):
+        self.setBackground()
+        self.setScreen()
+        self.setSpeed()
+        self.setPlayers()
+
+    def setBackground(self):
+        self.backgroundPath = "./resources/backgrounds/sea.bmp"
+
+    def setScreen(self):
+        self.screenWidth = 600
+        self.screenHeight = 500
+        self.screen = pygame.display.set_mode((self.screenWidth, self.screenHeight))
+
+    def setSpeed(self):
+        self.speed = 2
+        self.setBallSpeed(speed) #should be replaced by a "setBall" method calling the ball class
+
+    def setPlayers(self):
+        self.setPlayersSpeed(self.speed) #should be replaced to call the player class
+        #set the sizes
+    #This is a 1 to 2 players game only - an AI can replace a player
+    #Players can only move horizontally - speed is in 1 direction
+    def setPlayersSpeed(self,speed):
+        self.setPlayer1XSpeed(speed)
+        self.setPlayer2XSpeed(speed)
+
+    def setPlayer1Speed(self, speed):
+        self.player1XSpeed = speed
+
+    def setPlayer2Speed(self, speed):
+        self.player2XSpeed = speed
+
+    #There is only one ball at the moment
+    #A ball can move in a 2D plan
+    def setBallSpeed(self, speed):
+        self.ballXSpeed = speed
+        self.ballYSpeed = speed * 1.5
+
+
+
 def Game():    
     BACKGROUNDPATH= "./resources/backgrounds/sea.bmp"
     WIDTH = 600
@@ -32,7 +85,7 @@ def Game():
     PLAYERSTEP = 2 * STEP
     VX, VY = 1*STEP, 1.5*STEP
     RUNNING = True
-    TICKERMAX = 1
+    TICKERMAX = 0
 
     #Set the background surface using pygame
     background = pygame.image.load(BACKGROUNDPATH)
@@ -42,13 +95,7 @@ def Game():
     background = background.convert()
     #Set the font to use in the game / NB: you can define multiple fonts
     font = pygame.font.SysFont('Arial',24, True)
-    
-    ball = pygame.Surface((WIDTH/20,HEIGHT/20))
-    ball_x, ball_y = WIDTH/2-(WIDTH/20)/2, HEIGHT/2-(HEIGHT/20)/2
-    ball_vx, ball_vy= VX, VY
-    ball_move_ticker = 0
-    ball_move_ticker_max = TICKERMAX
-    ball.fill(yellow,(0,0,100,25))
+
 
     PLAYER1_PATH = "./resources/players/PandaDraw.png"
     PLAYER1 = Player(PLAYERWIDTH, 
@@ -72,6 +119,13 @@ def Game():
     PLAYERS = pygame.sprite.RenderUpdates()
     PLAYERS.add(PLAYER1)
     PLAYERS.add(PLAYER2)
+
+    ball = pygame.Surface((WIDTH/20,HEIGHT/20))
+    ball_x, ball_y = WIDTH/2-(WIDTH/20)/2, HEIGHT/2-(HEIGHT/20)/2
+    ball_vx, ball_vy= VX, VY
+    ball_move_ticker = 0
+    ball_move_ticker_max = TICKERMAX
+    ball.fill(yellow,(0,0,100,25))
 
     while RUNNING:
 		#Activate the events so  you can read the key pressed
