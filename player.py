@@ -5,39 +5,21 @@
 
 import os, pygame, sys, random
 from colours import *
+from sprite import *
 
-class Player(pygame.sprite.Sprite):
-    def __init__(self, width, height, posX, posY, tickermax, step, skinpath, file = None):
-        #A player is a sprite that can be updated
-        pygame.sprite.Sprite.__init__(self)
-
-        #Init size, position, speed, score and skin
-        self.width = width
-        self.height = height
-        self.size = (self.width, self.height)
-        self.skinpath = skinpath
-        self.image = pygame.image.load(skinpath)
-        self.image = pygame.transform.scale(self.image,self.size)
-        self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = posX, posY
-        self.ticker = 0
-        self.tickermax = max(tickermax,1)
-        self.step = step
-        self.score = 0
-
-    def moveRight(self):
-        if self.ticker == 0:
-            self.ticker = self.tickermax
-            self.rect.x = self.rect.x + self.step
-
-    def moveLeft(self):
-        if self.ticker == 0:
-            self.ticker = self.tickermax
-            self.rect.x = self.rect.x - self.step
+#A Player is a Sprite
+#It can move horizontally but not vertically
+#It also has a score
+class Player(Sprite):
+    def __init__(self, width = 0, height = 0, skinpath = "", posX = 0, posY = 0, speedX = 0, speedY = 0):  
+        Sprite.__init__(self, width, height, skinpath, posX, posY, speedX, speedY)      
+        self.setScore(0)
 
     def setScore(self, score):
         self.score = score
 
-    def update(self):
-        if self.ticker > 0:
-            self.ticker -= 1
+    def incrementScore(self, incrementValue):
+        self.score += incrementValue
+
+    def decrementScore(self, decrementValue):
+        self.score -= decrementValue

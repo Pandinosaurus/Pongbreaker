@@ -19,9 +19,26 @@ from player import *
 #Finish it
 # - add randomly appearing block to break
 # - add a second ball?
-# - give bonuses through block?
+# - give bonuses/maluses through the block?
+#Add design patterns
+# - singleton for the game
+# - factory for the blocks/bricks
 
 
+
+#A singleton decorator
+#source : http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html
+#class SingletonDecorator:
+#    def __init__(self,klass):
+#        self.klass = klass
+#        self.instance = None
+#    def __call__(self,*args,**kwds):
+#        if self.instance == None:
+#            self.instance = self.klass(*args,**kwds)
+#        return self.instance
+
+ 
+#@singleton
 class Gaming():
     def __init__(self):
         pygame.mixer.init(22050,-16,2,16)
@@ -34,40 +51,91 @@ class Gaming():
         pygame.display.set_icon(self.icon)
 
     def reset(self):
-        self.setBackground()
+        self.setParams()
         self.setScreen()
-        self.setSpeed()
+        self.setBackground()
         self.setPlayers()
+        self.setBall()
+
+    def setParams(self):
+        self.setScreenSize(600,500)
+        self.setGameSpeed(2)
+        self.setGameState(False)
+        self.setGameFPS(60)
+        self.setFonts('Arial',24)
+        
+    def setScreenSize(self, width, height):
+        self.screenWidth = width
+        self.screenHeight = height
+
+    def setGameSpeed(self, speed):
+        self.gameSpeed = speed #should be const and private
+
+    def setGameState(self, running):
+        self.running = running
+
+    def setGameFPS(self, FPS):
+        self.FPS = 60
+        
+
+    def setFonts(self, fontType, fontSize):
+        self.mainFont = pygame.font.SysFont(fontType,
+                                            fontSize, 
+                                            True)
+
+    def setScreen(self):
+        self.screen = pygame.display.set_mode((self.screenWidth, self.screenHeight))
 
     def setBackground(self):
         self.backgroundPath = "./resources/backgrounds/sea.bmp"
+        self.background = pygame.image.load(self.backgroundPath)
+        self.background = pygame.transform.scale(self.background, 
+                                                 (self.screenWidth, self.screenHeight))
+        self.background = self.background.convert()
 
-    def setScreen(self):
-        self.screenWidth = 600
-        self.screenHeight = 500
-        self.screen = pygame.display.set_mode((self.screenWidth, self.screenHeight))
-
-    def setSpeed(self):
-        self.speed = 2
-        self.setBallSpeed(speed) #should be replaced by a "setBall" method calling the ball class
-
-    def setPlayers(self):
-        self.setPlayersSpeed(self.speed) #should be replaced to call the player class
-        #set the sizes
     #This is a 1 to 2 players game only - an AI can replace a player
     #Players can only move horizontally - speed is in 1 direction
-    def setPlayersSpeed(self,speed):
-        self.setPlayer1XSpeed(speed)
-        self.setPlayer2XSpeed(speed)
+    #Note that the players could be fully initialized using the constructor
+    #But things are clearer like that
+    def setPlayers(self):
+        self.player1 = Player()
+        self.player2 = Player()
+        self.setPlayersSize(self.screenWidth  * 0.15, self.screenHeight * 0.1)
+        self.setPlayersSpeed(self.gameSpeed, 0)
+        self.setPlayersSkins()
+        self.setPlayersInitPos()
 
-    def setPlayer1Speed(self, speed):
-        self.player1XSpeed = speed
+    def setPlayersSize(self, width, height):
+        self.player1.setSize(width, height)
+        self.player2.setSize(width, height)
 
-    def setPlayer2Speed(self, speed):
-        self.player2XSpeed = speed
+    def setPlayersSpeed(self,speedX = 0, speedY = 0):
+        self.player1.setSpeed(speedX,speedY)
+        self.player2.setSpeed(speedX,speedY)
+
+    def setPlayersInitPos(self):
+        Y1 = 5
+        X1 = self.screenWidth/2 - self.player1Width/2
+        Y2 = self.screenHeight/2 - self.player2Height/2 - 5
+        X2 = self.screenWidth/2 - self.player2Width/2
+        self.player1.setPos(X1,Y1)
+        self.player2.setPos(X2,Y2)
+
+    def setPlayersSkins(self):
+        self.player1.setSkin("./resources/players/PandaDraw.png")
+        self.player2.setSkin("./resources/players/SealDraw.png")
 
     #There is only one ball at the moment
     #A ball can move in a 2D plan
+    def setBall(self):
+        self.setBallSize(self.screenWidth*0.6, 
+                         self.screenWidth*0.6)
+        self.setBallSpeed(self.gameSpeed)
+
+    def setBallSize(self, width, height):
+        self.ballWidth = width
+        self.ballHeight = height
+
     def setBallSpeed(self, speed):
         self.ballXSpeed = speed
         self.ballYSpeed = speed * 1.5
@@ -79,13 +147,14 @@ def Game():
     WIDTH = 600
     HEIGHT = 500
     SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-    STEP = 2
+    STEP = 5
     PLAYERWIDTH = WIDTH*15/100
     PLAYERHEIGHT = HEIGHT*5/50
     PLAYERSTEP = 2 * STEP
     VX, VY = 1*STEP, 1.5*STEP
     RUNNING = True
     TICKERMAX = 0
+    FPS= 60
 
     #Set the background surface using pygame
     background = pygame.image.load(BACKGROUNDPATH)
@@ -99,21 +168,19 @@ def Game():
 
     PLAYER1_PATH = "./resources/players/PandaDraw.png"
     PLAYER1 = Player(PLAYERWIDTH, 
-                     PLAYERHEIGHT, 
+                     PLAYERHEIGHT,
+                     PLAYER1_PATH, 
                      WIDTH/2-PLAYERWIDTH, 
                      5, 
-                     TICKERMAX, 
-                     PLAYERSTEP, 
-                     PLAYER1_PATH)
+                     PLAYERSTEP)
 
     PLAYER2_PATH = "./resources/players/SealDraw.png"
     PLAYER2 = Player(PLAYERWIDTH, 
                      PLAYERHEIGHT, 
+                     PLAYER2_PATH,
                      WIDTH/2-PLAYERWIDTH, 
-                     HEIGHT-5-PLAYERHEIGHT, #diff with player1
-                     TICKERMAX, 
-                     PLAYERSTEP, 
-                     PLAYER2_PATH) #diff with player1
+                     HEIGHT-5-PLAYERHEIGHT, #diff with player1 
+                     PLAYERSTEP) #diff with player1
 
 
     PLAYERS = pygame.sprite.RenderUpdates()
@@ -126,24 +193,34 @@ def Game():
     ball_move_ticker = 0
     ball_move_ticker_max = TICKERMAX
     ball.fill(yellow,(0,0,100,25))
+    
+    # Init the clock
+    clock = pygame.time.Clock()
 
     while RUNNING:
-		#Activate the events so  you can read the key pressed
+        # Make sure the maximal FPS is set to 60
+        clock.tick(FPS)
+
+		# Activate the events so  you can read the key pressed
+        # Check if the user want to quit the game
+        # Stop running it if necessary
         for event in pygame.event.get(): 
             if event.type == pygame.QUIT:
                 RUNNING = False
    
-        #Allow continuous move every ticker frames
+        # Allow continuous move by get the key pressed
+        # The motion period may be reduced using tickers
+        # 
         keys = pygame.key.get_pressed()
         if len(keys) > 0:       
             if keys[pygame.K_RIGHT]:
-                if PLAYER1.rect.x + PLAYER1.width + PLAYER1.step < WIDTH:
+                if PLAYER1.rect.x + PLAYER1.width + PLAYER1.speedX < WIDTH:
                     PLAYER1.moveRight()
             if keys[pygame.K_LEFT]:
                 if PLAYER1.rect.x - PLAYERSTEP > 0:
                     PLAYER1.moveLeft()
             if keys[pygame.K_d]:
-                if PLAYER2.rect.x + PLAYER2.width + PLAYER2.step < WIDTH:
+                if PLAYER2.rect.x + PLAYER2.width + PLAYER2.speedX < WIDTH:
                     PLAYER2.moveRight()
             if keys[pygame.K_q]:
                 if PLAYER2.rect.x - PLAYERSTEP > 0:
@@ -153,7 +230,7 @@ def Game():
 
         #Move the ball
         #If ball touch ai...
-        if isColliding((PLAYER2, PLAYER2.rect.x, PLAYER2.rect.y), (ball, ball_x, ball_y)):
+        if isColliding((PLAYER2, PLAYER2.getPosX(), PLAYER2.getPosY()), (ball, ball_x, ball_y)):
             if ball_vx > 0:
                 ball_vx = VX
                 ball_vy = VY
@@ -161,7 +238,7 @@ def Game():
                 ball_vx = -VX
                 ball_vy = VY
         #If the ball touched the player...
-        elif isColliding((PLAYER1, PLAYER1.rect.x, PLAYER1.rect.y), (ball, ball_x, ball_y)):
+        elif isColliding((PLAYER1, PLAYER1.getPosX(), PLAYER1.getPosY()), (ball, ball_x, ball_y)):
             if ball_vx > 0:
                ball_vx = VX
                ball_vy = -VY
@@ -209,3 +286,4 @@ if __name__ == '__main__':
     pygame.init()
     pygame.mixer.init(22050,-16,2,16)
     Game()
+    test = Gaming()
