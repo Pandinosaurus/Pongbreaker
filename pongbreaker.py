@@ -2,6 +2,7 @@ import os, pygame, sys, random
 from pygame.locals import *
 from colours import *
 from player import *
+from ball import *
 
 #ToDo :
 #A lot...
@@ -26,20 +27,45 @@ from player import *
 
 
 
-#A singleton decorator
-#source : http://python-3-patterns-idioms-test.readthedocs.io/en/latest/Singleton.html
-#class SingletonDecorator:
-#    def __init__(self,klass):
-#        self.klass = klass
-#        self.instance = None
-#    def __call__(self,*args,**kwds):
-#        if self.instance == None:
-#            self.instance = self.klass(*args,**kwds)
-#        return self.instance
+#A singleton class
+#source for comparison : https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
+#source for the code : https://stackoverflow.com/questions/31875/is-there-a-simple-elegant-way-to-define-singletons
+class Singleton:
+    """
+    A non-thread-safe helper class to ease implementing singletons.
+    This should be used as a decorator -- not a metaclass -- to the
+    class that should be a singleton.
+    The decorated class can define one `__init__` function that
+    takes only the `self` argument. Also, the decorated class cannot be
+    inherited from. Other than that, there are no restrictions that apply
+    to the decorated class.
+    To get the singleton instance, use the `Instance` method. Trying
+    to use `__call__` will result in a `TypeError` being raised.
+    """
 
- 
-#@singleton
-class Gaming():
+    def __init__(self, decorated):
+        self._decorated = decorated
+
+    def Instance(self):
+        """
+        Returns the singleton instance. Upon its first call, it creates a
+        new instance of the decorated class and calls its `__init__` method.
+        On all subsequent calls, the already created instance is returned.
+        """
+        try:
+            return self._instance
+        except AttributeError:
+            self._instance = self._decorated()
+            return self._instance
+
+    def __call__(self):
+        raise TypeError('Singletons must be accessed through `Instance()`.')
+
+    def __instancecheck__(self, inst):
+        return isinstance(inst, self._decorated)
+
+@Singleton
+class Gaming(Singleton):
     def __init__(self):
         pygame.mixer.init(22050,-16,2,16)
         pygame.init()
@@ -47,7 +73,8 @@ class Gaming():
         self.reset()
 
     def setIcon(self):
-        self.icon = pygame.image.load("./ressources/Players/SealDraw.png")
+        self.icon = pygame.image.load("./resources/players/PandaDraw.png")
+        self.icon = pygame.transform.rotate(self.icon,-90)
         pygame.display.set_icon(self.icon)
 
     def reset(self):
@@ -75,8 +102,7 @@ class Gaming():
         self.running = running
 
     def setGameFPS(self, FPS):
-        self.FPS = 60
-        
+        self.FPS = 60    
 
     def setFonts(self, fontType, fontSize):
         self.mainFont = pygame.font.SysFont(fontType,
@@ -105,6 +131,10 @@ class Gaming():
         self.setPlayersSkins()
         self.setPlayersInitPos()
 
+        self.players = pygame.sprite.RenderUpdates()
+        self.players.add(self.player1)
+        self.players.add(self.player2)
+
     def setPlayersSize(self, width, height):
         self.player1.setSize(width, height)
         self.player2.setSize(width, height)
@@ -114,11 +144,12 @@ class Gaming():
         self.player2.setSpeed(speedX,speedY)
 
     def setPlayersInitPos(self):
+        X1 = self.screenWidth/2 - self.player1.width/2
         Y1 = 5
-        X1 = self.screenWidth/2 - self.player1Width/2
-        Y2 = self.screenHeight/2 - self.player2Height/2 - 5
-        X2 = self.screenWidth/2 - self.player2Width/2
         self.player1.setPos(X1,Y1)
+
+        X2 = self.screenWidth/2 - self.player2.width/2
+        Y2 = self.screenHeight - self.player2.height - 5
         self.player2.setPos(X2,Y2)
 
     def setPlayersSkins(self):
@@ -128,22 +159,47 @@ class Gaming():
     #There is only one ball at the moment
     #A ball can move in a 2D plan
     def setBall(self):
-        self.setBallSize(self.screenWidth*0.6, 
-                         self.screenWidth*0.6)
-        self.setBallSpeed(self.gameSpeed)
+        self.ball = Ball()
+        self.ball.setSize(self.screenWidth/25, self.screenWidth/25)
+       	self.ball.setSpeed(1*self.gameSpeed, 0.5*self.gameSpeed) #the 1 and 0.5 coefficients can be use as angle definitions
+        self.ball.setSkin()
+        self.ball.setPos(self.screenWidth/2 - self.ball.width/2, 
+                         self.screenHeight/2 - self.ball.height/2)
+        self.ball.defineMove("UpRight")
 
-    def setBallSize(self, width, height):
-        self.ballWidth = width
-        self.ballHeight = height
+        self.balls = pygame.sprite.RenderUpdates()
+        self.balls.add(self.ball)
 
-    def setBallSpeed(self, speed):
-        self.ballXSpeed = speed
-        self.ballYSpeed = speed * 1.5
+    def run(self):
+        count = 100
+        while True:
 
+            #Play with the players
+            self.player1.moveLeft()
+            self.player2.moveRight()
+            
+            #Play with the ball
+            if count > 5:
+                self.ball.defineMove("UpRight")
+                count = count - 1
+            else:
+                self.ball.defineMove("UpLeft")
+
+            self.ball.moveIt()
+
+            #Update the positions
+            self.players.update()
+            self.balls.update()
+
+            #Show everything on the screen
+            self.screen.blit(self.background,(0,0))
+            self.players.draw(self.screen)
+            self.balls.draw(self.screen)
+            pygame.display.flip()
 
 
 def Game():    
-    BACKGROUNDPATH= "./resources/backgrounds/sea.bmp"
+    BACKGROUNDPATH= "./resources/backgrounds/desert.bmp"
     WIDTH = 600
     HEIGHT = 500
     SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -285,5 +341,5 @@ def isColliding(obj1, obj2): # check if two bouding boxes are colliding
 if __name__ == '__main__':
     pygame.init()
     pygame.mixer.init(22050,-16,2,16)
-    Game()
-    test = Gaming()
+    test = Gaming.Instance()
+    test.run()

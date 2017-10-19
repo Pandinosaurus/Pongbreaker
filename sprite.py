@@ -25,17 +25,21 @@ class Sprite(pygame.sprite.Sprite):
         self.setSpeed(speedX, speedY)
         self.tickermax = 1  
         self.ticker = 0
+        self.move = ""
 
     def setSize(self, width, height):
-        self.width =  width
-        self.height = height
+        self.width =  int(width)
+        self.height = int(height)
         self.size = (self.width, self.height)
 
     def setSkin(self, skinpath):
         self.skinpath = skinpath
-        self.image = pygame.image.load(skinpath)
-        self.image = pygame.transform.scale(self.image,self.size)
-        self.rect = self.image.get_rect()
+        if skinpath is not "": #should add a better condition
+            self.image = pygame.image.load(skinpath)
+            self.image = pygame.transform.scale(self.image,self.size)
+            self.rect = self.image.get_rect()        
+        else:
+            self.rect = pygame.Rect(0,0,0,0)
 
     def setPos(self, X, Y):
         self.setPosX(X)
@@ -71,6 +75,7 @@ class Sprite(pygame.sprite.Sprite):
     def getSpeedY(self):
         return self.speedY
 
+    #Single move in 2D
     def moveRight(self):
         if self.ticker == 0:
             self.ticker = self.tickermax
@@ -90,6 +95,53 @@ class Sprite(pygame.sprite.Sprite):
         if self.ticker == 0:
             self.ticker = self.tickermax
             self.rect.y = self.rect.y + self.speedY
+
+    #Combined move in 2D
+    def moveUpLeft(self):
+        if self.ticker == 0:
+            self.ticker = self.tickermax
+            self.rect.x = self.rect.x - self.speedX
+            self.rect.y = self.rect.y - self.speedY
+
+    def moveUpRight(self):
+        if self.ticker == 0:
+            self.ticker = self.tickermax
+            self.rect.x = self.rect.x + self.speedX
+            self.rect.y = self.rect.y - self.speedY
+
+    def moveDownLeft(self):
+        if self.ticker == 0:
+            self.ticker = self.tickermax
+            self.rect.x = self.rect.x - self.speedX
+            self.rect.y = self.rect.y + self.speedY
+
+    def moveDownRight(self):
+        if self.ticker == 0:
+            self.ticker = self.tickermax
+            self.rect.x = self.rect.x + self.speedX
+            self.rect.y = self.rect.y + self.speedY
+
+    #For external
+    def defineMove(self,move=""):
+        self.move = move
+
+    def moveIt(self):
+        if self.move == "Up":
+            self.moveUp()
+        elif self.move == "Down":
+            self.moveDown()
+        elif self.move == "Right":
+            self.moveRight()
+        elif self.move == "Left":
+            self.moveLeft()
+        elif self.move == "UpRight":
+            self.moveUpRight()
+        elif self.move == "UpLeft":
+            self.moveUpLeft()
+        elif self.move == "DownRight":
+            self.moveDownRight()
+        elif self.move == "DownLeft":
+            self.moveDownLeft()
 
     def resize(self,width, height):
         self.setSize(self, width, height)
