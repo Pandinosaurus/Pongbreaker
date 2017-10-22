@@ -8,11 +8,10 @@ from random import randint
 
 #ToDo :
 #Finish it
-# - add randomly appearing block to break
-# - add a second ball?
-# - give bonuses/maluses through the block?
-#Add design patterns
-# - factory for the blocks/bricks
+# - solve the fun behavior of the block with dedicated methods? Or keep it? I personally like it.
+# - add multiple textures for the blocks
+# - give bonuses/maluses through the blocks?
+# - Refactor??
 
 
 
@@ -175,7 +174,7 @@ class Gaming(Singleton):
 
     def addBricks(self, number = 0):
         if number > 0:
-            setNumberOfBricksToAdd(number)
+            self.setNumberOfBricksToAdd(number)
 
         maxTrials = self.numberOfBricksToAdd*2 #avoid infinite loop in case of constant overlaping
         while self.numberOfBricksToAdd > 0 and maxTrials > 0:
@@ -267,7 +266,11 @@ class Gaming(Singleton):
     def checkIfBallIsCollidingABrick(self):
         for brick in self.bricks:
             if isColliding(self.ball, brick):
+                brick.lives -= 1
                 self.ball.reflectMoveAlongX()
+                if brick.lives == 0:
+                    self.bricks.remove(brick)
+                    self.addBricks(1)
                 break
 
     def checkCollidingBorders(self):
