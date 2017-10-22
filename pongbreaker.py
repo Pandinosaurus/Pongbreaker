@@ -5,24 +5,11 @@ from player import *
 from ball import *
 
 #ToDo :
-#A lot...
-#Make it clearer through OO
-# - Use the ball class
-# - Make the ball being a circle
-# - Create a game class
-#Make it more readable and extendable
-# - Find a gracious way to manage the tickers
-# - Use a configuration file ton manage the backgrounds
-# - Redefine a STEP versus the SPEED and the VELOCITY (VX, VY)
-# - Rename the PATH to make them more relevant (PATH -> skin)
-# - Is there kind of a switch in Python? If true use it
-# - Make isColliding clearer - both name, arguments and code
 #Finish it
 # - add randomly appearing block to break
 # - add a second ball?
 # - give bonuses/maluses through the block?
 #Add design patterns
-# - singleton for the game
 # - factory for the blocks/bricks
 
 
@@ -161,7 +148,7 @@ class Gaming(Singleton):
     def setBall(self):
         self.ball = Ball()
         self.ball.setSize(self.screenWidth/25, self.screenWidth/25)
-       	self.ball.setSpeed(1*self.gameSpeed, 0.5*self.gameSpeed) #the 1 and 0.5 coefficients can be use as angle definitions
+       	self.ball.setSpeed(1*self.gameSpeed, 0.8*self.gameSpeed) #the 1 and 0.5 coefficients can be use as angle definitions
         self.ball.setSkin()
         self.ball.setPos(self.screenWidth/2 - self.ball.width/2, 
                          self.screenHeight/2 - self.ball.height/2)
@@ -172,170 +159,103 @@ class Gaming(Singleton):
 
     def run(self):
         count = 100
-        while True:
-
-            #Play with the players
-            self.player1.moveLeft()
-            self.player2.moveRight()
-            
-            #Play with the ball
-            if count > 5:
-                self.ball.defineMove("UpRight")
-                count = count - 1
-            else:
-                self.ball.defineMove("UpLeft")
-
-            self.ball.moveIt()
-
-            #Update the positions
+        self.running = True
+        while self.running:
+            self.checkQuit()
+            self.movePlayers()
+            self.moveBalls()
             self.players.update()
             self.balls.update()
 
             #Show everything on the screen
+            player1_score_text = self.mainFont.render(str(self.player1.getScore()),True,cyan)
+            player2_score_text = self.mainFont.render(str(self.player2.getScore()),True,red)
             self.screen.blit(self.background,(0,0))
+            self.screen.blit(player1_score_text,(5,5))
+            self.screen.blit(player2_score_text,(5, self.screenHeight-5-player2_score_text.get_height()))
             self.players.draw(self.screen)
             self.balls.draw(self.screen)
             pygame.display.flip()
 
-
-def Game():    
-    BACKGROUNDPATH= "./resources/backgrounds/desert.bmp"
-    WIDTH = 600
-    HEIGHT = 500
-    SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-    STEP = 5
-    PLAYERWIDTH = WIDTH*15/100
-    PLAYERHEIGHT = HEIGHT*5/50
-    PLAYERSTEP = 2 * STEP
-    VX, VY = 1*STEP, 1.5*STEP
-    RUNNING = True
-    TICKERMAX = 0
-    FPS= 60
-
-    #Set the background surface using pygame
-    background = pygame.image.load(BACKGROUNDPATH)
-    #Transform it so it is scaled to the current screen
-    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
-    #Set video system so it is fast to render the image
-    background = background.convert()
-    #Set the font to use in the game / NB: you can define multiple fonts
-    font = pygame.font.SysFont('Arial',24, True)
-
-
-    PLAYER1_PATH = "./resources/players/PandaDraw.png"
-    PLAYER1 = Player(PLAYERWIDTH, 
-                     PLAYERHEIGHT,
-                     PLAYER1_PATH, 
-                     WIDTH/2-PLAYERWIDTH, 
-                     5, 
-                     PLAYERSTEP)
-
-    PLAYER2_PATH = "./resources/players/SealDraw.png"
-    PLAYER2 = Player(PLAYERWIDTH, 
-                     PLAYERHEIGHT, 
-                     PLAYER2_PATH,
-                     WIDTH/2-PLAYERWIDTH, 
-                     HEIGHT-5-PLAYERHEIGHT, #diff with player1 
-                     PLAYERSTEP) #diff with player1
-
-
-    PLAYERS = pygame.sprite.RenderUpdates()
-    PLAYERS.add(PLAYER1)
-    PLAYERS.add(PLAYER2)
-
-    ball = pygame.Surface((WIDTH/20,HEIGHT/20))
-    ball_x, ball_y = WIDTH/2-(WIDTH/20)/2, HEIGHT/2-(HEIGHT/20)/2
-    ball_vx, ball_vy= VX, VY
-    ball_move_ticker = 0
-    ball_move_ticker_max = TICKERMAX
-    ball.fill(yellow,(0,0,100,25))
-    
-    # Init the clock
-    clock = pygame.time.Clock()
-
-    while RUNNING:
-        # Make sure the maximal FPS is set to 60
-        clock.tick(FPS)
-
-		# Activate the events so  you can read the key pressed
+    def checkQuit(self):
+        # Activate the events so  you can read the key pressed
         # Check if the user want to quit the game
         # Stop running it if necessary
         for event in pygame.event.get(): 
             if event.type == pygame.QUIT:
-                RUNNING = False
-   
+                self.running = False
+
+    def movePlayers(self):
         # Allow continuous move by get the key pressed
         # The motion period may be reduced using tickers
-        # 
-        keys = pygame.key.get_pressed()
+        keys = pygame.key.get_pressed() 
         if len(keys) > 0:       
             if keys[pygame.K_RIGHT]:
-                if PLAYER1.rect.x + PLAYER1.width + PLAYER1.speedX < WIDTH:
-                    PLAYER1.moveRight()
+                if self.player1.getPosX() + self.player1.getWidth() + self.player1.getSpeedX() < self.screenWidth:
+                    self.player1.defineMove("Right") #we call defineMove then moveIt instead of moveRight for consistency with the ball 
+                    self.player1.moveIt()
             if keys[pygame.K_LEFT]:
-                if PLAYER1.rect.x - PLAYERSTEP > 0:
-                    PLAYER1.moveLeft()
+                if self.player1.getPosX() - self.player1.getSpeedX() > 0:
+                    self.player1.defineMove("Left")
+                    self.player1.moveIt()
             if keys[pygame.K_d]:
-                if PLAYER2.rect.x + PLAYER2.width + PLAYER2.speedX < WIDTH:
-                    PLAYER2.moveRight()
+                if self.player2.getPosX() + self.player2.getWidth() + self.player2.getSpeedX() < self.screenWidth:
+                    self.player2.defineMove("Right")
+                    self.player2.moveIt()
             if keys[pygame.K_q]:
-                if PLAYER2.rect.x - PLAYERSTEP > 0:
-                    PLAYER2.moveLeft()
-            PLAYERS.update()
+                if self.player2.getPosX() - self.player2.getSpeedX() > 0:
+                    self.player2.defineMove("Left")
+                    self.player2.moveIt()
 
-
-        #Move the ball
-        #If ball touch ai...
-        if isColliding((PLAYER2, PLAYER2.getPosX(), PLAYER2.getPosY()), (ball, ball_x, ball_y)):
-            if ball_vx > 0:
-                ball_vx = VX
-                ball_vy = VY
-            else:
-                ball_vx = -VX
-                ball_vy = VY
-        #If the ball touched the player...
-        elif isColliding((PLAYER1, PLAYER1.getPosX(), PLAYER1.getPosY()), (ball, ball_x, ball_y)):
-            if ball_vx > 0:
-               ball_vx = VX
-               ball_vy = -VY
-            else:
-               ball_vx = -VX
-               ball_vy = -VY
-
-        #If the ball touched a wall, inverse motion of the ball
-        if ball_x-2 <= 0: #left
-            ball_vx *= -1 
-        if ball_x + pygame.Surface.get_width(ball)+2 >= WIDTH: #right
-            ball_vx *= -1  
-        if ball_y-2 <= 0: #top
-            ball_vy *= -1
-            PLAYER2.setScore( PLAYER2.score + 1 )
-        if ball_y + pygame.Surface.get_height(ball)+2 >= HEIGHT: #bottom
-            ball_vy *= -1
-            PLAYER1.setScore( PLAYER1.score + 1 )
+    def moveBalls(self):      
+        if(self.checkCollidingPlayers()):
+            self.ball.moveIt()
+            return
         
-        player_score_text = font.render(str(PLAYER1.score),True,cyan)
-        ai_score_text = font.render(str(PLAYER2.score),True,red)
+        self.checkCollidingBorders()
+        self.ball.moveIt()
 
-        #If it's time to update the ball, update its position using vx and vy
-        if ball_move_ticker == 0:
-            ball_move_ticker = ball_move_ticker_max
-            ball_y -= ball_vy #velocity is just a way to say 'move it of a given number of pixels'
-            ball_x -= ball_vx #velocity is just a way to say 'move it of a given number of pixels'
-        
-        if ball_move_ticker > 0:
-            ball_move_ticker -= 1
-        
-        SCREEN.blit(background,(0,0))
-        PLAYERS.draw(SCREEN)
-        SCREEN.blit(ball,(ball_x,ball_y))
-        SCREEN.blit(player_score_text,(5,5))
-        SCREEN.blit(ai_score_text,(5, HEIGHT-5-ai_score_text.get_height()))
-        pygame.display.flip()
+    def checkCollidingPlayers(self):
+        ballMove = self.ball.getMove()
+        if self.checkIfBallIsBetweenPlayers():
+            if isColliding((self.player1, self.player1.getPosX(), self.player1.getPosY()), 
+                           (self.ball, self.ball.getPosX(), self.ball.getPosY())):
+                if ballMove == "Up" or ballMove == "UpRight" or ballMove == "UpLeft":
+                    self.ball.reflectMoveAlongX()
+                    return True
+            elif isColliding((self.player2, self.player2.getPosX(), self.player2.getPosY()), 
+                             (self.ball, self.ball.getPosX(), self.ball.getPosY())):
+                if ballMove == "Down" or ballMove == "DownRight" or ballMove == "DownLeft":
+                    self.ball.reflectMoveAlongX()
+                    return True
+        return False
+
+    def checkIfBallIsBetweenPlayers(self):
+        if self.ball.getPosY() >= self.player1.getPosY() + self.player1.getHeight()-1:
+            if self.ball.getPosY() < self.player2.getPosY():
+                return True
+        return False
+
+    def checkCollidingBorders(self):
+        if self.ball.getPosX() <= 0:
+            self.ball.setPosX = 0
+            self.ball.reflectMoveAlongY()
+        elif self.ball.getPosX()+self.ball.getWidth() >= self.screenWidth:
+            self.ball.setPosX = self.screenWidth-self.ball.getWidth()
+            self.ball.reflectMoveAlongY()
+
+        if self.ball.getPosY() <= 0:
+            self.ball.setPosY = 0
+            self.ball.reflectMoveAlongX()
+            self.player2.incrementScore()
+        elif self.ball.getPosY()+self.ball.getHeight() >= self.screenHeight:
+            self.ball.setPosY = self.screenHeight-self.ball.getHeight()
+            self.ball.reflectMoveAlongX()
+            self.player1.incrementScore()
 
 def isColliding(obj1, obj2): # check if two bouding boxes are colliding
     rect1 = pygame.Rect(obj1[1], obj1[2], obj1[0].width, obj1[0].height)
-    rect2 = pygame.Rect(obj2[1], obj2[2], pygame.Surface.get_bounding_rect(obj2[0])[2], pygame.Surface.get_bounding_rect(obj2[0])[3])
+    rect2 = pygame.Rect(obj2[1], obj2[2], obj2[0].width, obj2[0].height)
     return rect1.colliderect(rect2)
 
 if __name__ == '__main__':

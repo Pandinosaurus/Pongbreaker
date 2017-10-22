@@ -32,6 +32,15 @@ class Sprite(pygame.sprite.Sprite):
         self.height = int(height)
         self.size = (self.width, self.height)
 
+    def getWidth(self):
+        return self.width
+
+    def getHeight(self):
+        return self.height
+
+    def getSize(self):
+        return self.size
+
     def setSkin(self, skinpath):
         self.skinpath = skinpath
         if skinpath is not "": #should add a better condition
@@ -125,6 +134,60 @@ class Sprite(pygame.sprite.Sprite):
     def defineMove(self,move=""):
         self.move = move
 
+    def invertMove(self):
+        if self.move == "Up":
+            self.defineMove("Down")
+        elif self.move == "Down":
+            self.defineMove("Up")
+        elif self.move == "Right":
+            self.defineMove("Left")
+        elif self.move == "Left":
+            self.defineMove("Right")
+        elif self.move == "UpRight":
+            self.defineMove("DownLeft")
+        elif self.move == "UpLeft":
+            self.defineMove("DownRight")
+        elif self.move == "DownRight":
+            self.defineMove("UpLeft")
+        elif self.move == "DownLeft":
+            self.defineMove("UpRight")
+
+    def reflectMoveAlongX(self):
+        if self.move == "Up":
+            self.defineMove("Down")
+        elif self.move == "Down":
+            self.defineMove("Up")
+        elif self.move == "Right":
+            self.defineMove("Left")
+        elif self.move == "Left":
+            self.defineMove("Right")
+        elif self.move == "UpRight":
+            self.defineMove("DownRight")
+        elif self.move == "UpLeft":
+            self.defineMove("DownLeft")
+        elif self.move == "DownRight":
+            self.defineMove("UpRight")
+        elif self.move == "DownLeft":
+            self.defineMove("UpLeft")
+
+    def reflectMoveAlongY(self):
+        if self.move == "Up":
+            self.defineMove("Down")
+        elif self.move == "Down":
+            self.defineMove("Up")
+        elif self.move == "Right":
+            self.defineMove("Left")
+        elif self.move == "Left":
+            self.defineMove("Right")
+        elif self.move == "UpRight":
+            self.defineMove("UpLeft")
+        elif self.move == "UpLeft":
+            self.defineMove("UpRight")
+        elif self.move == "DownRight":
+            self.defineMove("DownLeft")
+        elif self.move == "DownLeft":
+            self.defineMove("DownRight")
+
     def moveIt(self):
         if self.move == "Up":
             self.moveUp()
@@ -142,6 +205,9 @@ class Sprite(pygame.sprite.Sprite):
             self.moveDownRight()
         elif self.move == "DownLeft":
             self.moveDownLeft()
+
+    def getMove(self):
+        return self.move
 
     def resize(self,width, height):
         self.setSize(self, width, height)

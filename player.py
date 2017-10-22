@@ -18,8 +18,11 @@ class Player(Sprite):
     def setScore(self, score):
         self.score = score
 
-    def incrementScore(self, incrementValue):
+    def getScore(self):
+        return self.score
+
+    def incrementScore(self, incrementValue=1):
         self.score += incrementValue
 
-    def decrementScore(self, decrementValue):
+    def decrementScore(self, decrementValue=1):
         self.score -= decrementValue
