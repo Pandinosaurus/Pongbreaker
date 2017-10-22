@@ -3,6 +3,8 @@ from pygame.locals import *
 from colours import *
 from player import *
 from ball import *
+from brick import *
+from random import randint
 
 #ToDo :
 #Finish it
@@ -70,10 +72,11 @@ class Gaming(Singleton):
         self.setBackground()
         self.setPlayers()
         self.setBall()
+        self.setBricks()
 
     def setParams(self):
-        self.setScreenSize(600,500)
-        self.setGameSpeed(2)
+        self.setScreenSize(700,500)
+        self.setGameSpeed(4)
         self.setGameState(False)
         self.setGameFPS(60)
         self.setFonts('Arial',24)
@@ -157,8 +160,44 @@ class Gaming(Singleton):
         self.balls = pygame.sprite.RenderUpdates()
         self.balls.add(self.ball)
 
+    #Set bricks
+    def setBricks(self):
+        self.initBricks()
+        self.setNumberOfBricksToAdd(10)
+        self.addBricks()
+
+    def initBricks(self):
+        self.bricks = pygame.sprite.RenderUpdates()
+        self.numberOfBricks = 0
+
+    def setNumberOfBricksToAdd(self, number):
+        self.numberOfBricksToAdd = number
+
+    def addBricks(self, number = 0):
+        if number > 0:
+            setNumberOfBricksToAdd(number)
+
+        maxTrials = self.numberOfBricksToAdd*2 #avoid infinite loop in case of constant overlaping
+        while self.numberOfBricksToAdd > 0 and maxTrials > 0:
+            brick = Brick(self.screenWidth/15, self.screenWidth/30)
+            brick.setSkin()
+            brick.setPos(randint(brick.getWidth(), 
+                                 self.screenWidth-brick.getWidth()), 
+                         randint(self.player1.getPosY() + self.player1.getHeight() + brick.getHeight(),
+                                 self.player2.getPosY() - self.player2.getHeight() - brick.getHeight()))
+            overlap = False
+            for br in self.bricks:
+                if isColliding(br, brick):
+                   overlap = True
+                   break
+            if overlap == False:
+                self.bricks.add(brick)
+                self.numberOfBricksToAdd -= 1
+                self.numberOfBricks += 1
+
+            maxTrials -=1
+
     def run(self):
-        count = 100
         self.running = True
         while self.running:
             self.checkQuit()
@@ -166,16 +205,7 @@ class Gaming(Singleton):
             self.moveBalls()
             self.players.update()
             self.balls.update()
-
-            #Show everything on the screen
-            player1_score_text = self.mainFont.render(str(self.player1.getScore()),True,cyan)
-            player2_score_text = self.mainFont.render(str(self.player2.getScore()),True,red)
-            self.screen.blit(self.background,(0,0))
-            self.screen.blit(player1_score_text,(5,5))
-            self.screen.blit(player2_score_text,(5, self.screenHeight-5-player2_score_text.get_height()))
-            self.players.draw(self.screen)
-            self.balls.draw(self.screen)
-            pygame.display.flip()
+            self.display()
 
     def checkQuit(self):
         # Activate the events so  you can read the key pressed
@@ -211,30 +241,34 @@ class Gaming(Singleton):
         if(self.checkCollidingPlayers()):
             self.ball.moveIt()
             return
-        
+        self.checkIfBallIsCollidingABrick()
         self.checkCollidingBorders()
         self.ball.moveIt()
 
     def checkCollidingPlayers(self):
         ballMove = self.ball.getMove()
         if self.checkIfBallIsBetweenPlayers():
-            if isColliding((self.player1, self.player1.getPosX(), self.player1.getPosY()), 
-                           (self.ball, self.ball.getPosX(), self.ball.getPosY())):
+            if isColliding(self.player1,self.ball):
                 if ballMove == "Up" or ballMove == "UpRight" or ballMove == "UpLeft":
                     self.ball.reflectMoveAlongX()
                     return True
-            elif isColliding((self.player2, self.player2.getPosX(), self.player2.getPosY()), 
-                             (self.ball, self.ball.getPosX(), self.ball.getPosY())):
+            elif isColliding(self.player2,self.ball):
                 if ballMove == "Down" or ballMove == "DownRight" or ballMove == "DownLeft":
                     self.ball.reflectMoveAlongX()
                     return True
         return False
 
     def checkIfBallIsBetweenPlayers(self):
-        if self.ball.getPosY() >= self.player1.getPosY() + self.player1.getHeight()-1:
+        if self.ball.getPosY() >= self.player1.getPosY() + self.player1.getHeight()/2:
             if self.ball.getPosY() < self.player2.getPosY():
                 return True
         return False
+
+    def checkIfBallIsCollidingABrick(self):
+        for brick in self.bricks:
+            if isColliding(self.ball, brick):
+                self.ball.reflectMoveAlongX()
+                break
 
     def checkCollidingBorders(self):
         if self.ball.getPosX() <= 0:
@@ -253,9 +287,20 @@ class Gaming(Singleton):
             self.ball.reflectMoveAlongX()
             self.player1.incrementScore()
 
+    def display(self):
+        player1_score_text = self.mainFont.render(str(self.player1.getScore()),True,cyan)
+        player2_score_text = self.mainFont.render(str(self.player2.getScore()),True,red)
+        self.screen.blit(self.background,(0,0))
+        self.screen.blit(player1_score_text,(5,5))
+        self.screen.blit(player2_score_text,(5, self.screenHeight-5-player2_score_text.get_height()))
+        self.players.draw(self.screen)
+        self.balls.draw(self.screen)
+        self.bricks.draw(self.screen)
+        pygame.display.flip()
+
 def isColliding(obj1, obj2): # check if two bouding boxes are colliding
-    rect1 = pygame.Rect(obj1[1], obj1[2], obj1[0].width, obj1[0].height)
-    rect2 = pygame.Rect(obj2[1], obj2[2], obj2[0].width, obj2[0].height)
+    rect1 = pygame.Rect(obj1.getPosX(), obj1.getPosY(), obj1.getWidth(), obj1.getHeight())
+    rect2 = pygame.Rect(obj2.getPosX(), obj2.getPosY(), obj2.getWidth(), obj2.getHeight())
     return rect1.colliderect(rect2)
 
 if __name__ == '__main__':

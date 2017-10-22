@@ -8,13 +8,12 @@ from pygame.locals import *
 from colours import *
 from sprite import *
 
-class Ball(Sprite):
+class Brick(Sprite):
     def __init__(self, width = 0, height = 0, skinpath = "", posX = 0, posY = 0, speedX = 0, speedY = 0):  
         Sprite.__init__(self, width, height, skinpath, posX, posY, speedX, speedY)
-        self.move = "UpRight"
+        self.move = ""
 
     def setSkin(self,skinpath=""):
-        self.image = pygame.Surface([self.width,self.width])
-        pygame.draw.circle(self.image, (0,0,255), (self.width/2,self.height/2),self.width/2) 
-        #pygame.draw.ellipse(self.image, yellow, [0,0, self.width, self.height])
+        self.image = pygame.Surface([self.width,self.height])
+        self.image.fill(getRandColor()) 
         self.rect = self.image.get_rect()
