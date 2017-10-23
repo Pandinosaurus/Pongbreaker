@@ -3,8 +3,8 @@
 <h2> Launch </h2> 
 <p> >> python pongbreaker.py </p>
 <h2> Commands </h2>
-<p> Player 1 keys : q button & d button </p>
-<p> Player 2 keys : left arrow and right arrow </p>
+<p> Player 1 keys : q button / d button </p>
+<p> Player 2 keys : left arrow / right arrow </p>
 <h2> Requirements </h2> 
 <p> - Python 2.7 <br/> - Pygame </p>
 <h2> Useful links </h2>
