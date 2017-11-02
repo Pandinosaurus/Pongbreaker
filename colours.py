@@ -24,7 +24,14 @@ skyblue = (  0,191,255) #13
 
 def getRandColor():
     val = randint(0,numberOfColors-1)
+    #val = randint(2,3)
     return getColor(val)
+
+def getRandColorBetween2(color1, color2):
+    val = randint(1,2)
+    if val == 1:
+        return color1
+    return color2
 
 def getColor(val):
     if val == 0:

@@ -75,7 +75,7 @@ class Gaming(Singleton):
 
     def setParams(self):
         self.setScreenSize(700,500)
-        self.setGameSpeed(4)
+        self.setGameSpeed(8)
         self.setGameState(False)
         self.setGameFPS(60)
         self.setFonts('Arial',24)
@@ -116,7 +116,7 @@ class Gaming(Singleton):
         self.player1 = Player()
         self.player2 = Player()
         self.setPlayersSize(self.screenWidth  * 0.15, self.screenHeight * 0.1)
-        self.setPlayersSpeed(self.gameSpeed, 0)
+        self.setPlayersSpeed(self.gameSpeed*2, 0)
         self.setPlayersSkins()
         self.setPlayersInitPos()
 
@@ -197,7 +197,7 @@ class Gaming(Singleton):
             maxTrials -=1
 
     def run(self):
-        self.running = True
+        self.checkStart()
         while self.running:
             self.checkQuit()
             self.movePlayers()
@@ -213,6 +213,15 @@ class Gaming(Singleton):
         for event in pygame.event.get(): 
             if event.type == pygame.QUIT:
                 self.running = False
+
+    def checkStart(self):
+        done = False
+        while not done:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    done = True
+                    self.running = True
+
 
     def movePlayers(self):
         # Allow continuous move by get the key pressed
@@ -266,8 +275,12 @@ class Gaming(Singleton):
     def checkIfBallIsCollidingABrick(self):
         for brick in self.bricks:
             if isColliding(self.ball, brick):
-                brick.lives -= 1
-                self.ball.reflectMoveAlongX()
+                if brick.width > brick.height:
+                    brick.setLives(brick.lives - 1)
+                    self.ball.reflectMoveAlongX()
+                else:
+                    brick.setLives(brick.lives - 1)
+                    self.ball.reflectMoveAlongY()
                 if brick.lives == 0:
                     self.bricks.remove(brick)
                     self.addBricks(1)
