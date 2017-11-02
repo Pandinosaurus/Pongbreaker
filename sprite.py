@@ -2,7 +2,6 @@
 #File	 : player.py
 #Author  : Remi Ratajczak
 #Contact : Remi.Ratajczak@gmail.com
-#ToDo : add dictionary mapping for switch like behavior : https://www.pydanny.com/why-doesnt-python-have-switch-case.html
 
 import os, pygame, sys, random
 from colours import *
