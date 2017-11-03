@@ -15,7 +15,7 @@ class Ball(Sprite):
 
     def setSkin(self,skinpath=""):
         self.image = pygame.Surface([self.width,self.width])
-        self.setColor(getRandColor())
+        self.setColor(cyan)
         pygame.draw.circle(self.image, self.color, (self.width/2,self.height/2),self.width/2)
         #pygame.draw.ellipse(self.image, yellow, [0,0, self.width, self.height])
         self.rect = self.image.get_rect()

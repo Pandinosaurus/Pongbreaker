@@ -5,52 +5,13 @@ from player import *
 from ball import *
 from brick import *
 from random import randint
+from singleton import *
 
 #ToDo :
 #Finish it
-# - solve the fun behavior of the block with dedicated methods? Or keep it? I personally like it.
+# - better check for collision between ball and bricks = where does the ball comes from ?
 # - add multiple textures for the blocks
 # - give bonuses/maluses through the blocks?
-# - Refactor??
-
-
-
-#A singleton class
-#source for comparison : https://stackoverflow.com/questions/6760685/creating-a-singleton-in-python
-#source for the code : https://stackoverflow.com/questions/31875/is-there-a-simple-elegant-way-to-define-singletons
-class Singleton:
-    """
-    A non-thread-safe helper class to ease implementing singletons.
-    This should be used as a decorator -- not a metaclass -- to the
-    class that should be a singleton.
-    The decorated class can define one `__init__` function that
-    takes only the `self` argument. Also, the decorated class cannot be
-    inherited from. Other than that, there are no restrictions that apply
-    to the decorated class.
-    To get the singleton instance, use the `Instance` method. Trying
-    to use `__call__` will result in a `TypeError` being raised.
-    """
-
-    def __init__(self, decorated):
-        self._decorated = decorated
-
-    def Instance(self):
-        """
-        Returns the singleton instance. Upon its first call, it creates a
-        new instance of the decorated class and calls its `__init__` method.
-        On all subsequent calls, the already created instance is returned.
-        """
-        try:
-            return self._instance
-        except AttributeError:
-            self._instance = self._decorated()
-            return self._instance
-
-    def __call__(self):
-        raise TypeError('Singletons must be accessed through `Instance()`.')
-
-    def __instancecheck__(self, inst):
-        return isinstance(inst, self._decorated)
 
 @Singleton
 class Gaming(Singleton):
@@ -74,12 +35,20 @@ class Gaming(Singleton):
         self.setBricks()
 
     def setParams(self):
-        self.setScreenSize(700,500)
+        self.setScreenSize(800,500)
         self.setGameSpeed(8)
         self.setGameState(False)
         self.setGameFPS(60)
-        self.setFonts('Arial',24)
-        
+        self.setScoreFonts('Arial',24)
+        self.setTitleFonts('Arial',40)
+        self.setStartFonts('Arial',20)
+    
+    def setTitleText( self, text, color ):
+        self.titleText = self.titleFont.render(str(text), False, color)
+    
+    def setStartText( self, text, color ):
+        self.startText = self.scoreFont.render(str(text), False, color)
+    
     def setScreenSize(self, width, height):
         self.screenWidth = width
         self.screenHeight = height
@@ -93,16 +62,26 @@ class Gaming(Singleton):
     def setGameFPS(self, FPS):
         self.FPS = 60    
 
-    def setFonts(self, fontType, fontSize):
-        self.mainFont = pygame.font.SysFont(fontType,
+    def setScoreFonts(self, fontType, fontSize):
+        self.scoreFont = pygame.font.SysFont(fontType,
                                             fontSize, 
                                             True)
-
+    
+    def setTitleFonts(self, fontType, fontSize):
+        self.titleFont = pygame.font.SysFont(fontType,
+                                             fontSize,
+                                             True)
+    
+    def setStartFonts(self, fontType, fontSize):
+        self.startFont = pygame.font.SysFont(fontType,
+                                             fontSize,
+                                             True)
+    #screen
     def setScreen(self):
         self.screen = pygame.display.set_mode((self.screenWidth, self.screenHeight))
 
     def setBackground(self):
-        self.backgroundPath = "./resources/backgrounds/sea.bmp"
+        self.backgroundPath = "./resources/backgrounds/fun.bmp"
         self.background = pygame.image.load(self.backgroundPath)
         self.background = pygame.transform.scale(self.background, 
                                                  (self.screenWidth, self.screenHeight))
@@ -150,7 +129,7 @@ class Gaming(Singleton):
     def setBall(self):
         self.ball = Ball()
         self.ball.setSize(self.screenWidth/25, self.screenWidth/25)
-       	self.ball.setSpeed(1*self.gameSpeed, 0.8*self.gameSpeed) #the 1 and 0.5 coefficients can be use as angle definitions
+       	self.ball.setSpeed(1*self.gameSpeed, 0.9*self.gameSpeed) #the 1 and 0.5 coefficients can be use as angle definitions - the bigger the value the sharper the angle
         self.ball.setSkin()
         self.ball.setPos(self.screenWidth/2 - self.ball.width/2, 
                          self.screenHeight/2 - self.ball.height/2)
@@ -162,7 +141,7 @@ class Gaming(Singleton):
     #Set bricks
     def setBricks(self):
         self.initBricks()
-        self.setNumberOfBricksToAdd(10)
+        self.setNumberOfBricksToAdd(15)
         self.addBricks()
 
     def initBricks(self):
@@ -196,7 +175,21 @@ class Gaming(Singleton):
 
             maxTrials -=1
 
+    #title screen
+    def titleScreen(self):
+        self.setTitleText("Pongbreaker", red);
+        self.setStartText("Press <enter> to start", white);
+        self.screen.fill( black )
+        self.screen.blit(self.titleText,(self.screenWidth/2  - self.titleText.get_width()/2,
+                                         self.screenHeight/3 - self.titleText.get_height()/2))
+        self.screen.blit(self.startText, (self.screenWidth/2  - self.startText.get_width()/2,
+                                          self.screenHeight/3 + self.titleText.get_height()))
+        self.screen.blit(self.icon, (self.screenWidth/2  - self.icon.get_width()/3,
+                                     self.screenHeight/2 + self.titleText.get_height() + self.startText.get_height()))
+        self.display()
+    
     def run(self):
+        self.titleScreen()
         self.checkStart()
         while self.running:
             self.checkQuit()
@@ -204,6 +197,7 @@ class Gaming(Singleton):
             self.moveBalls()
             self.players.update()
             self.balls.update()
+            self.drawSpritesAndScores()
             self.display()
 
     def checkQuit(self):
@@ -288,39 +282,36 @@ class Gaming(Singleton):
 
     def checkCollidingBorders(self):
         if self.ball.getPosX() <= 0:
-            self.ball.setPosX = 0
+            self.ball.setPosX = 1 #necessary offset
             self.ball.reflectMoveAlongY()
         elif self.ball.getPosX()+self.ball.getWidth() >= self.screenWidth:
-            self.ball.setPosX = self.screenWidth-self.ball.getWidth()
+            self.ball.setPosX = self.screenWidth-self.ball.getWidth()-1
             self.ball.reflectMoveAlongY()
 
         if self.ball.getPosY() <= 0:
-            self.ball.setPosY = 0
+            self.ball.setPosY = 1
             self.ball.reflectMoveAlongX()
             self.player2.incrementScore()
         elif self.ball.getPosY()+self.ball.getHeight() >= self.screenHeight:
-            self.ball.setPosY = self.screenHeight-self.ball.getHeight()
+            self.ball.setPosY = self.screenHeight-self.ball.getHeight()-1
             self.ball.reflectMoveAlongX()
             self.player1.incrementScore()
-
-    def display(self):
-        player1_score_text = self.mainFont.render(str(self.player1.getScore()),True,cyan)
-        player2_score_text = self.mainFont.render(str(self.player2.getScore()),True,red)
+    
+    def drawSpritesAndScores(self):
+        player1_score_text = self.scoreFont.render(str(self.player1.getScore()),True,cyan)
+        player2_score_text = self.scoreFont.render(str(self.player2.getScore()),True,red)
         self.screen.blit(self.background,(0,0))
         self.screen.blit(player1_score_text,(5,5))
         self.screen.blit(player2_score_text,(5, self.screenHeight-5-player2_score_text.get_height()))
         self.players.draw(self.screen)
         self.balls.draw(self.screen)
         self.bricks.draw(self.screen)
+    
+    def display(self):
         pygame.display.flip()
+        pygame.display.update()
 
 def isColliding(obj1, obj2): # check if two bouding boxes are colliding
     rect1 = pygame.Rect(obj1.getPosX(), obj1.getPosY(), obj1.getWidth(), obj1.getHeight())
     rect2 = pygame.Rect(obj2.getPosX(), obj2.getPosY(), obj2.getWidth(), obj2.getHeight())
     return rect1.colliderect(rect2)
-
-if __name__ == '__main__':
-    pygame.init()
-    pygame.mixer.init(22050,-16,2,16)
-    test = Gaming.Instance()
-    test.run()

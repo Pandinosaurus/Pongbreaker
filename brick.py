@@ -15,22 +15,30 @@ class Brick(Sprite):
         self.setLives(self.maxLives)
 
     def setSkin(self,skinpath=""):
-        print(self.width)
-        if randint(0,1) == 1: #1 corresponds to blue AND vertical
-            if self.width > self.height:
-                tmp = self.width
-                self.width = self.height
-                self.height = tmp
-            self.setColor(blue)
-        else:
-            if self.height > self.width:
-                tmp = self.height
-                self.height = self.width
-                self.width = tmp
-            self.setColor(red)
+        self.setOrientation()
         self.image = pygame.Surface([self.width,self.height])
         self.image.fill(self.color)
         self.rect = self.image.get_rect()
+
+    def setOrientation(self):
+        if randint(0,1) == 1: #1 corresponds to blue AND vertical
+            self.setVertical()
+        else:
+            self.setHorizontal()
+
+    def setVertical(self):
+        if self.width > self.height:
+            tmp = self.width
+            self.width = self.height
+            self.height = tmp
+        self.setColor(purple)
+
+    def setHorizontal(self):
+        if self.height > self.width:
+            tmp = self.height
+            self.height = self.width
+            self.width = tmp
+        self.setColor(yellow)
 
     def setLives(self, lives):
         self.lives = lives
