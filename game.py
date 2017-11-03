@@ -1,3 +1,8 @@
+#Project : Pongbreaker
+#File	 : game.py
+#Author  : Remi Ratajczak
+#Contact : Remi.Ratajczak@gmail.com
+
 import os, pygame, sys, random
 from pygame.locals import *
 from colours import *
@@ -14,7 +19,7 @@ from singleton import *
 # - give bonuses/maluses through the blocks?
 
 @Singleton
-class Gaming(Singleton):
+class PongbreakerGame(Singleton):
     def __init__(self):
         pygame.mixer.init(22050,-16,2,16)
         pygame.init()

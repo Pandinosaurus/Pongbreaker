@@ -1,5 +1,5 @@
 #Project : Pongbreaker
-#File	 : player.py
+#File	 : sprite.py
 #Author  : Remi Ratajczak
 #Contact : Remi.Ratajczak@gmail.com
 

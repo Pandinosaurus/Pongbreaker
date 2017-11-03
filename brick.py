@@ -1,5 +1,5 @@
 #Project : Pongbreaker
-#File	 : ball.py
+#File	 : brick.py
 #Author  : Remi Ratajczak
 #Contact : Remi.Ratajczak@gmail.com
 

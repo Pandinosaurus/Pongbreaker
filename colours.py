@@ -1,4 +1,4 @@
-#Project : Flying-Seal
+#Project : Pongbreaker
 #File	 : colours.py
 #Author  : Remi Ratajczak
 #Contact : Remi.Ratajczak@gmail.com

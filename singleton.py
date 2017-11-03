@@ -1,3 +1,8 @@
+#Project : Pongbreaker
+#File	 : singleton.py
+#Author  : Remi Ratajczak
+#Contact : Remi.Ratajczak@gmail.com
+
 import os, pygame, sys
 
 #A singleton class
