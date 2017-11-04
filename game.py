@@ -41,7 +41,7 @@ class PongbreakerGame(Singleton):
 
     def setParams(self):
         self.setScreenSize(800,500)
-        self.setGameSpeed(8)
+        self.setGameSpeed(4)
         self.setGameState(False)
         self.setGameFPS(60)
         self.setScoreFonts('Arial',24)
