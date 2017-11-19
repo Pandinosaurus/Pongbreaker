@@ -40,10 +40,11 @@ class PongbreakerGame(Singleton):
         self.setBricks()
 
     def setParams(self):
+        self.maxScore = 10
         self.setScreenSize(800,500)
         self.setGameSpeed(4)
         self.setGameState(False)
-        self.setGameFPS(60)
+        self.setGameFPS(24)
         self.setScoreFonts('Arial',24)
         self.setTitleFonts('Arial',40)
         self.setStartFonts('Arial',20)
@@ -204,6 +205,7 @@ class PongbreakerGame(Singleton):
             self.balls.update()
             self.drawSpritesAndScores()
             self.display()
+            self.checkVictory()
 
     def checkQuit(self):
         # Activate the events so  you can read the key pressed
@@ -315,6 +317,12 @@ class PongbreakerGame(Singleton):
     def display(self):
         pygame.display.flip()
         pygame.display.update()
+        
+    def checkVictory(self):
+        if self.player1.getScore() == self.maxScore:
+			self.running = False
+        if self.player2.getScore() == self.maxScore:
+			self.running = False
 
 def isColliding(obj1, obj2): # check if two bouding boxes are colliding
     rect1 = pygame.Rect(obj1.getPosX(), obj1.getPosY(), obj1.getWidth(), obj1.getHeight())
