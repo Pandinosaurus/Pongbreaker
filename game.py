@@ -42,9 +42,9 @@ class PongbreakerGame(Singleton):
     def setParams(self):
         self.maxScore = 10
         self.setScreenSize(800,500)
-        self.setGameSpeed(4)
+        self.setGameSpeed(1)
         self.setGameState(False)
-        self.setGameFPS(24)
+        self.setGameFPS(60)
         self.setScoreFonts('Arial',24)
         self.setTitleFonts('Arial',40)
         self.setStartFonts('Arial',20)
@@ -135,7 +135,7 @@ class PongbreakerGame(Singleton):
     def setBall(self):
         self.ball = Ball()
         self.ball.setSize(self.screenWidth/25, self.screenWidth/25)
-       	self.ball.setSpeed(1*self.gameSpeed, 0.9*self.gameSpeed) #the 1 and 0.5 coefficients can be use as angle definitions - the bigger the value the sharper the angle
+       	self.ball.setSpeed(1*self.gameSpeed, 1*self.gameSpeed) #the 1 and 1 coefficients can be use as angle definitions - the bigger the value the sharper the angle
         self.ball.setSkin()
         self.ball.setPos(self.screenWidth/2 - self.ball.width/2, 
                          self.screenHeight/2 - self.ball.height/2)
@@ -320,9 +320,9 @@ class PongbreakerGame(Singleton):
         
     def checkVictory(self):
         if self.player1.getScore() == self.maxScore:
-			self.running = False
+            self.running = False
         if self.player2.getScore() == self.maxScore:
-			self.running = False
+            self.running = False
 
 def isColliding(obj1, obj2): # check if two bouding boxes are colliding
     rect1 = pygame.Rect(obj1.getPosX(), obj1.getPosY(), obj1.getWidth(), obj1.getHeight())

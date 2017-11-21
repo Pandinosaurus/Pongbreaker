@@ -43,12 +43,12 @@ class Ball(Sprite):
         if self.width != self.height:
             self.setSurface()
         #Make sure the ball is shaped inside a square 
-        self.radius = self.width / 2 #a ball is a circle first
-        self.lineWidth = self.radius / 2 #how thick the border of the ball will be - should by < radius - if set to zero the object will be filled with self.color
+        self.radius = (int)(self.width/2) #a ball is a circle first
+        self.lineWidth = (int)(self.radius/2) #how thick the border of the ball will be - should by < radius - if set to zero the object will be filled with self.color
 
     def setSkin(self,skinpath=""):
         self.setSurface() #in case it has not been made before
         self.setShape() #in case it has not been made before
         self.setColor(cyan) #in case it has not been made before
-        x,y = self.width/2,self.height/2
+        x,y = (int)(self.width/2),(int)(self.height/2)
         pygame.draw.circle(self.image, self.color, (x,y), self.radius, self.lineWidth)
