@@ -1,5 +1,5 @@
 # Pongbreaker
-A desktop arcade game based on the "Pong" and "Block Breaker" concepts.
+A desktop arcade game based on the "Pong" and "Block Breaker" concepts. <br>
 ![](videos/PongBreaker_01.gif?raw=true)
 
 
