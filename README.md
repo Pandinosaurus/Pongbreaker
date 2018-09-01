@@ -1,6 +1,6 @@
 
 # Pongbreaker
-A desktop arcade game based on the "Pong" and "Block Breaker" concepts. <br>
+A two players desktop arcade game based on the "Pong" and "Block Breaker" concepts. <br>
 ![](videos/PongBreaker_01.gif?raw=true)
 
 
@@ -13,6 +13,10 @@ Will you be able to help Sealy?
 
 ## Launch
 >> python main.py
+
+## Play
+A-D
+Left arrow - Right arrow
 
 ## Requirements
 Before to play, you will need to install the pygame package. We recommend using pip.
